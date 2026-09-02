@@ -102,6 +102,27 @@ ALTER TABLE `user`
   MODIFY `id_user` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 COMMIT;
 
+============================
+
+
+DROP TABLE IF EXISTS `berkas`;
+
+CREATE TABLE `berkas` (
+    `id_berkas` INT NOT NULL AUTO_INCREMENT,
+    `n_dokumen` VARCHAR(255) NOT NULL,
+    `tgl_kirim` DATE NOT NULL,
+    `tgl_terima` DATE DEFAULT NULL,
+    `tujuan` VARCHAR(255) NOT NULL,
+    `keterangan` TEXT DEFAULT NULL,
+    `status` ENUM('Dikirim','Diterima') NOT NULL DEFAULT 'Dikirim',
+    PRIMARY KEY (`id_berkas`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `berkas`
+(`n_dokumen`, `tgl_kirim`, `tgl_terima`, `tujuan`, `keterangan`, `status`)
+VALUES
+('Rapat', '2026-08-01', NULL, 'Mbak Lisa', 'Rapat tgl 01 bulan 08', 'Dikirim');
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
