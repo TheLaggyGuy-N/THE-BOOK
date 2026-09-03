@@ -5,209 +5,212 @@ require_once "model/Berkas.php";
 class BerkasController {
 
     public function index() {
+
+        session_start();
+
+        if (!isset($_SESSION['id_user'])) {
+            header("Location: index.php?aksi=login");
+            exit;
+        }
+
         $model = new Berkas();
-        $data = $model->tampilData();
+
+        $data = $model->tampilData($_SESSION['id_user']);
         $user = $model->tampilUser();
 
         require_once "views/tampilan.php";
     }
 
-    public function login() {
-        $error = "";
-
-        if (isset($_SESSION['error'])) {
-            $error = $_SESSION['error'];
-            unset($_SESSION['error']);
-        }
-
-        require_once "views/login.php";
-    }
-
-    public function prosesLogin() {
-        $username = $_POST['username'];
-        $password = $_POST['password'];
-
-        $model = new Berkas();
-        $user = $model->cekLogin($username, $password);
-
-        if ($user) {
-            $_SESSION['user'] = $user;
-            header("Location: index.php?page=beranda");
-        } else {
-            $_SESSION['error'] = "Username atau password salah";
-            header("Location: index.php?page=login");
-        }
-    }
-
-    public function signIn() {
-        $error = "";
-
-        if (isset($_SESSION['error'])) {
-            $error = $_SESSION['error'];
-            unset($_SESSION['error']);
-        }
-
-        require_once "views/sign_in.php";
-    }
-
-    public function prosesSignIn() {
-        $nama = trim($_POST['nama']);
-        $username = trim($_POST['username']);
-        $password = trim($_POST['password']);
-        $no_tlp = trim($_POST['no_tlp']);
-        $email = trim($_POST['email']);
-        $bagian = trim($_POST['bagian']);
-
-        if (empty($nama) || empty($username) || empty($password) || empty($no_tlp) || empty($bagian)) {
-            $_SESSION['error'] = "Nama, username, password, no. telepon, dan bagian wajib diisi.";
-            header("Location: index.php?page=signIn");
-            exit;
-        }
-
-        $model = new Berkas();
-        if (!$model->tambahUser($nama, $username, $password, $no_tlp, $email, $bagian)) {
-            $_SESSION['error'] = "Username sudah digunakan atau pendaftaran gagal.";
-            header("Location: index.php?page=signIn");
-            exit;
-        }
-
-        $_SESSION['success'] = "Pendaftaran berhasil. Silakan login.";
-        header("Location: index.php?page=login");
-        exit;
-    }
-
-    public function logout() {
-        session_destroy();
-        header("Location: index.php?page=login");
-    }
-
-    public function beranda() {
-        $model = new Berkas();
-        $user = $_SESSION['user'];
-        $data = $model->tampilData();
-
-        $total = count($data);
-        $diterima = 0;
-
-        foreach ($data as $row) {
-            if ($row['status'] == "Diterima") {
-                $diterima++;
-            }
-        }
-
-        $menunggu = $total - $diterima;
-
-        require_once "views/beranda.php";
-    }
-
-    public function berkasInternal() {
-        require_once "views/berkas_internal.php";
-    }
-
-    public function listBerkas() {
-        $model = new Berkas();
-        $data = $model->tampilData();
-
-        require_once "views/list_berkas.php";
-    }
-
     public function tambah() {
+
+        session_start();
+
+        if (!isset($_SESSION['id_user'])) {
+            header("Location: index.php?aksi=login");
+            exit;
+        }
+
         $model = new Berkas();
-        $users = $model->daftarUser();
+
+        $user = $model->tampilUser();
 
         require_once "views/tambah.php";
     }
 
     public function prosesTambah() {
-        $nama = trim($_POST['n_dokumen'] ?? '');
-        $tgl = trim($_POST['tgl_kirim'] ?? '');
-        $tujuan = trim($_POST['tujuan'] ?? '');
-        $keterangan = trim($_POST['keterangan'] ?? '');
+
+        session_start();
+
+        if (!isset($_SESSION['id_user'])) {
+            header("Location: index.php?aksi=login");
+            exit;
+        }
+
+        $nama = $_POST['n_dokumen'];
+        $tgl = $_POST['tgl_kirim'];
+        $pengirim = $_SESSION['id_user'];
+
+        $tujuan = isset($_POST['tujuan']) && $_POST['tujuan'] != ""
+            ? $_POST['tujuan']
+            : NULL;
+
+        $semua = isset($_POST['semua']) ? 1 : 0;
+
+        $keterangan = $_POST['keterangan'];
+
+        $file = "";
+
+        if (isset($_FILES['file_berkas']) &&
+            $_FILES['file_berkas']['error'] == 0) {
+
+            $namaFile = $_FILES['file_berkas']['name'];
+            $tmpFile = $_FILES['file_berkas']['tmp_name'];
+
+            $folder = "uploads/";
+
+            if (!is_dir($folder)) {
+                mkdir($folder, 0777, true);
+            }
+
+            $file = time() . "_" . $namaFile;
+
+            move_uploaded_file(
+                $tmpFile,
+                $folder . $file
+            );
+        }
 
         $model = new Berkas();
 
-        if (empty($nama) || empty($tgl) || empty($tujuan)) {
-            $_SESSION['error'] = "Semua field wajib diisi.";
-            header("Location: index.php?page=tambah");
-            exit;
-        }
+        $model->tambahData(
+            $nama,
+            $tgl,
+            $pengirim,
+            $tujuan,
+            $semua,
+            $keterangan,
+            $file
+        );
 
-        $result = $model->tambahData($nama, $tgl, $tujuan, $keterangan);
-
-        if (!$result) {
-            $_SESSION['error'] = "Gagal menambah data. Periksa data atau struktur database.";
-            header("Location: index.php?page=tambah");
-            exit;
-        }
-
-        header("Location: index.php?page=listBerkas");
+        header("Location: index.php?aksi=berkas");
         exit;
     }
 
     public function edit() {
+
+        session_start();
+
+        if (!isset($_SESSION['id_user'])) {
+            header("Location: index.php?aksi=login");
+            exit;
+        }
+
         $id = $_GET['id'];
 
         $model = new Berkas();
+
         $data = $model->editData($id);
+        $user = $model->tampilUser();
 
         require_once "views/edit.php";
     }
 
     public function prosesEdit() {
+
+        session_start();
+
+        if (!isset($_SESSION['id_user'])) {
+            header("Location: index.php?aksi=login");
+            exit;
+        }
+
         $id = $_POST['id_berkas'];
         $nama = $_POST['n_dokumen'];
         $tgl = $_POST['tgl_kirim'];
-        $tujuan = $_POST['tujuan'];
+
+        $tujuan = isset($_POST['tujuan']) && $_POST['tujuan'] != ""
+            ? $_POST['tujuan']
+            : NULL;
+
+        $semua = isset($_POST['semua']) ? 1 : 0;
+
         $keterangan = $_POST['keterangan'];
 
+        $file = "";
+
+        if (isset($_FILES['file_berkas']) &&
+            $_FILES['file_berkas']['error'] == 0) {
+
+            $namaFile = $_FILES['file_berkas']['name'];
+            $tmpFile = $_FILES['file_berkas']['tmp_name'];
+
+            $folder = "uploads/";
+
+            if (!is_dir($folder)) {
+                mkdir($folder, 0777, true);
+            }
+
+            $file = time() . "_" . $namaFile;
+
+            move_uploaded_file(
+                $tmpFile,
+                $folder . $file
+            );
+        }
+
         $model = new Berkas();
-        $model->prosesEdit($id, $nama, $tgl, $tujuan, $keterangan);
 
-        header("Location: index.php?page=listBerkas");
-    }
+        $model->prosesEdit(
+            $id,
+            $nama,
+            $tgl,
+            $tujuan,
+            $semua,
+            $keterangan,
+            $file
+        );
 
-    public function terima() {
-        $id = $_GET['id'];
-
-        $model = new Berkas();
-        $model->terimaData($id);
-
-        header("Location: index.php?page=listBerkas");
+        header("Location: index.php?aksi=berkas");
+        exit;
     }
 
     public function hapus() {
+
+        session_start();
+
+        if (!isset($_SESSION['id_user'])) {
+            header("Location: index.php?aksi=login");
+            exit;
+        }
+
         $id = $_GET['id'];
 
         $model = new Berkas();
+
         $model->hapusData($id);
 
-        header("Location: index.php?page=listBerkas");
+        header("Location: index.php?aksi=berkas");
+        exit;
     }
 
-    public function profile() {
-        $model = new Berkas();
-        $user = $_SESSION['user'];
-        $data = $model->profilData($user['id_user']);
+    public function terima() {
 
-        require_once "views/profile.php";
-    }
+        session_start();
 
-    public function prosesProfile() {
-        $id = $_POST['id_user'];
-        $nama = $_POST['nama'];
-        $username = $_POST['username'];
-        $password = $_POST['password'];
-        $bagian = $_POST['bagian'];
-        $no_tlp = $_POST['no_tlp'];
-        $email = $_POST['email'];
-        $role = $_POST['role'];
+        if (!isset($_SESSION['id_user'])) {
+            header("Location: index.php?aksi=login");
+            exit;
+        }
+
+        $id = $_GET['id'];
+        $id_user = $_SESSION['id_user'];
 
         $model = new Berkas();
-        $model->updateProfile($id, $nama, $username, $password, $bagian, $no_tlp, $email, $role);
 
-        $_SESSION['user'] = $model->profilData($id);
+        $model->terimaData($id, $id_user);
 
-        header("Location: index.php?page=profile");
+        header("Location: index.php?aksi=berkas");
+        exit;
     }
 }
 

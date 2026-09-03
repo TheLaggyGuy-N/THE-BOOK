@@ -1,128 +1,166 @@
 <?php
-    require_once "config/database.php";
 
-    class Berkas {
-        private $db;
-        public function __construct(){
-            $database = new database();
-            $this->db = $database->conn;
-        }
+require_once "config/Koneksi.php";
 
-        public function tampilUser(){
-            return $_SESSION['user'] ?? [];
-        }
+class Berkas {
 
-        public function daftarUser(){
-            if (!$this->db) {
-                return [];
-            }
+    private $conn;
 
-            $query = mysqli_query($this->db, "SELECT id_user, nama, username, bagian FROM user ORDER BY nama ASC");
-            $users = [];
-            while ($query && $row = mysqli_fetch_assoc($query)) {
-                $users[] = $row;
-            }
-            return $users;
-        }
-
-        public function cekLogin($username, $password){
-            if (!$this->db) {
-                return false;
-            }
-            $query = mysqli_query($this->db, "SELECT * FROM user WHERE username='$username' AND password='$password' LIMIT 1");
-            if ($query && mysqli_num_rows($query) > 0) {
-                return mysqli_fetch_assoc($query);
-            }
-            return false;
-        }
-
-        public function tambahUser($nama, $username, $password, $no_tlp, $email, $bagian){
-            if (!$this->db) {
-                return false;
-            }
-
-            $cek = mysqli_query($this->db, "SELECT id_user FROM user WHERE username='$username' LIMIT 1");
-            if ($cek && mysqli_num_rows($cek) > 0) {
-                return false;
-            }
-
-            return mysqli_query($this->db, "INSERT INTO user (nama, username, password, bagian, no_tlp, email, role) VALUES ('$nama', '$username', '$password', '$bagian', '$no_tlp', '$email', 'pegawai')");
-        }
-
-        public function profilData($id){
-            if (!$this->db) {
-                return [];
-            }
-            $query = mysqli_query($this->db, "SELECT * FROM user WHERE id_user='$id' LIMIT 1");
-            if ($query && mysqli_num_rows($query) > 0) {
-                return mysqli_fetch_assoc($query);
-            }
-            return [];
-        }
-
-        public function updateProfile($id, $nama, $username, $password, $bagian, $no_tlp, $email, $role){
-            if (!$this->db) {
-                return true;
-            }
-            $query = mysqli_query($this->db, "UPDATE user SET nama='$nama', username='$username', password='$password', bagian='$bagian', no_tlp='$no_tlp', email='$email', role='$role' WHERE id_user='$id'");
-            return $query;
-        }
-
-        public function tampilData(){
-            if (!$this->db) {
-                return [];
-            }
-            $query = mysqli_query($this->db, "SELECT * FROM berkas ORDER BY id_berkas DESC");
-            $data = [];
-            while ($row = mysqli_fetch_assoc($query)) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-
-        public function tambahData($nama, $tanggal, $tujuan, $keterangan){
-            if (!$this->db) {
-                return false;
-            }
-            if (empty($nama) || empty($tanggal) || empty($tujuan)) {
-                return false;
-            }
-            $query = mysqli_query($this->db, "INSERT INTO berkas (n_dokumen, tgl_kirim, tgl_terima, tujuan, keterangan, status) VALUES ('$nama', '$tanggal', NULL, '$tujuan', '$keterangan', 'Dikirim')");
-            return $query;
-        }
-
-        public function editData($id){
-            if (!$this->db) {
-                return [];
-            }
-            $query = mysqli_query($this->db, "SELECT * FROM berkas WHERE id_berkas='$id' LIMIT 1");
-            if ($query && mysqli_num_rows($query) > 0) {
-                return mysqli_fetch_assoc($query);
-            }
-            return [];
-        }
-
-        public function prosesEdit($id, $nama, $tanggal, $tujuan, $keterangan){
-            if (!$this->db) {
-                return true;
-            }
-            $query = mysqli_query($this->db, "UPDATE berkas SET n_dokumen='$nama', tgl_kirim='$tanggal', tujuan='$tujuan', keterangan='$keterangan' WHERE id_berkas='$id'");
-            return $query;
-        }
-        public function hapusData($id){
-            if (!$this->db) {
-                return true;
-            }
-            $query = mysqli_query($this->db, "DELETE FROM berkas WHERE id_berkas='$id'");
-            return $query;
-        }
-
-        public function terimaData($id){
-            if (!$this->db) {
-                return true;
-            }
-            $query = mysqli_query($this->db, "UPDATE berkas SET status='Diterima' WHERE id_berkas='$id'");
-            return $query;
-        }
+    public function __construct() {
+        $db = new Koneksi();
+        $this->conn = $db->getKoneksi();
     }
+
+    public function tampilData($id_user) {
+
+        $sql = "SELECT berkas.*,
+                pengirim.nama AS nama_pengirim,
+                penerima.nama AS nama_penerima
+                FROM berkas
+                JOIN `user` pengirim
+                ON berkas.id_pengirim = pengirim.id_user
+                LEFT JOIN `user` penerima
+                ON berkas.id_tujuan = penerima.id_user
+                WHERE berkas.id_tujuan = $id_user
+                OR berkas.tujuan_semua = 1
+                OR berkas.id_pengirim = $id_user
+                ORDER BY berkas.id_berkas DESC";
+
+        $hasil = $this->conn->query($sql);
+
+        $data = [];
+
+        while ($row = $hasil->fetch_assoc()) {
+            $data[] = $row;
+        }
+
+        return $data;
+    }
+
+    public function tampilUser() {
+
+        $sql = "SELECT * FROM `user`
+                ORDER BY nama ASC";
+
+        $hasil = $this->conn->query($sql);
+
+        $data = [];
+
+        while ($row = $hasil->fetch_assoc()) {
+            $data[] = $row;
+        }
+
+        return $data;
+    }
+
+    public function tambahData($nama, $tgl, $pengirim, $tujuan, $semua, $keterangan, $file) {
+
+        if ($semua == 1) {
+
+            $sql = "INSERT INTO berkas
+            (n_dokumen, tgl_kirim, id_pengirim, id_tujuan, tujuan_semua, tgl_terima, keterangan, file_berkas)
+            VALUES
+            ('$nama', '$tgl', '$pengirim', NULL, 1, NULL, '$keterangan', '$file')";
+
+        } else {
+
+            $sql = "INSERT INTO berkas
+            (n_dokumen, tgl_kirim, id_pengirim, id_tujuan, tujuan_semua, tgl_terima, keterangan, file_berkas)
+            VALUES
+            ('$nama', '$tgl', '$pengirim', '$tujuan', 0, NULL, '$keterangan', '$file')";
+        }
+
+        return $this->conn->query($sql);
+    }
+
+    public function editData($id) {
+
+        $sql = "SELECT * FROM berkas
+                WHERE id_berkas = $id";
+
+        $hasil = $this->conn->query($sql);
+
+        return $hasil->fetch_assoc();
+    }
+
+    public function prosesEdit($id, $nama, $tgl, $tujuan, $semua, $keterangan, $file) {
+
+        if ($semua == 1) {
+
+            if ($file != "") {
+
+                $sql = "UPDATE berkas SET
+                        n_dokumen = '$nama',
+                        tgl_kirim = '$tgl',
+                        id_tujuan = NULL,
+                        tujuan_semua = 1,
+                        tgl_terima = NULL,
+                        keterangan = '$keterangan',
+                        file_berkas = '$file'
+                        WHERE id_berkas = $id";
+
+            } else {
+
+                $sql = "UPDATE berkas SET
+                        n_dokumen = '$nama',
+                        tgl_kirim = '$tgl',
+                        id_tujuan = NULL,
+                        tujuan_semua = 1,
+                        tgl_terima = NULL,
+                        keterangan = '$keterangan'
+                        WHERE id_berkas = $id";
+            }
+
+        } else {
+
+            if ($file != "") {
+
+                $sql = "UPDATE berkas SET
+                        n_dokumen = '$nama',
+                        tgl_kirim = '$tgl',
+                        id_tujuan = '$tujuan',
+                        tujuan_semua = 0,
+                        tgl_terima = NULL,
+                        keterangan = '$keterangan',
+                        file_berkas = '$file'
+                        WHERE id_berkas = $id";
+
+            } else {
+
+                $sql = "UPDATE berkas SET
+                        n_dokumen = '$nama',
+                        tgl_kirim = '$tgl',
+                        id_tujuan = '$tujuan',
+                        tujuan_semua = 0,
+                        tgl_terima = NULL,
+                        keterangan = '$keterangan'
+                        WHERE id_berkas = $id";
+            }
+        }
+
+        return $this->conn->query($sql);
+    }
+
+    public function hapusData($id) {
+
+        $sql = "DELETE FROM berkas
+                WHERE id_berkas = $id";
+
+        return $this->conn->query($sql);
+    }
+
+    public function terimaData($id, $id_user) {
+
+        $sql = "UPDATE berkas SET
+                tgl_terima = CURDATE()
+                WHERE id_berkas = $id
+                AND (
+                    id_tujuan = $id_user
+                    OR tujuan_semua = 1
+                )";
+
+        return $this->conn->query($sql);
+    }
+}
+
 ?>

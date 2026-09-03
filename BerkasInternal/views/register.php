@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login e-Ekspedisi</title>
+    <title>Buat Akun - e-Ekspedisi</title>
+
     <style>
         body {
             font-family: Arial;
             background: #f2f2f2;
         }
 
-        .login {
-            width: 350px;
-            margin: 100px auto;
+        .register {
+            width: 400px;
+            margin: 50px auto;
             background: white;
             padding: 25px;
             border-radius: 10px;
@@ -19,7 +20,7 @@
         input {
             width: 100%;
             padding: 10px;
-            margin: 8px 0;
+            margin: 7px 0;
             box-sizing: border-box;
         }
 
@@ -30,30 +31,42 @@
             color: white;
             border: none;
         }
-
-        a {
-            text-decoration: none;
-        }
     </style>
 </head>
+
 <body>
 
-<div class="login">
-    <h2>Login e-Ekspedisi</h2>
+<div class="register">
 
-    <form action="index.php?aksi=prosesLogin" method="POST">
+    <h2>Buat Akun</h2>
+
+    <form action="index.php?aksi=prosesRegister" method="POST">
+
+        <label>Nama</label>
+        <input type="text" name="nama" required>
+
         <label>Username</label>
         <input type="text" name="username" required>
 
         <label>Password</label>
         <input type="password" name="password" required>
 
-        <button type="submit">Login</button>
+        <label>Bagian</label>
+        <input type="text" name="bagian" required>
+
+        <label>No. Telepon</label>
+        <input type="text" name="no_tlp" required>
+
+        <label>Email</label>
+        <input type="email" name="email" required>
+
+        <button type="submit">Buat Akun</button>
+
     </form>
 
     <br>
-    <a href="index.php?aksi=register">Buat Akun</a><br>
-    <a href="index.php?aksi=lupa">Lupa Password?</a>
+    <a href="index.php?aksi=login">Kembali ke Login</a>
+
 </div>
 
 </body>

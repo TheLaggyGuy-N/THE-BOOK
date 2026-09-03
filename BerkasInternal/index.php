@@ -1,67 +1,63 @@
 <?php
-session_start();
 
+require_once "controller/LoginController.php";
+require_once "controller/RegisterController.php";
+require_once "controller/HomeController.php";
 require_once "controller/BerkasController.php";
 
-$controller = new BerkasController();
-$page = isset($_GET['page']) ? $_GET['page'] : 'login';
+$aksi = isset($_GET['aksi']) ? $_GET['aksi'] : 'login';
 
-if (!isset($_SESSION['user']) && $page != 'login' && $page != 'prosesLogin' && $page != 'signIn' && $page != 'prosesSignIn') {
-    header("Location: index.php?page=login");
-    exit;
+if ($aksi == 'login') {
+    $controller = new LoginController();
+    $controller->login();
+
+} elseif ($aksi == 'prosesLogin') {
+    $controller = new LoginController();
+    $controller->prosesLogin();
+
+} elseif ($aksi == 'register') {
+    $controller = new RegisterController();
+    $controller->register();
+
+} elseif ($aksi == 'prosesRegister') {
+    $controller = new RegisterController();
+    $controller->prosesRegister();
+
+} elseif ($aksi == 'home') {
+    $controller = new HomeController();
+    $controller->index();
+
+} elseif ($aksi == 'logout') {
+    $controller = new HomeController();
+    $controller->logout();
+
+} elseif ($aksi == 'berkas') {
+    $controller = new BerkasController();
+    $controller->index();
+
+} elseif ($aksi == 'tambah') {
+    $controller = new BerkasController();
+    $controller->tambah();
+
+} elseif ($aksi == 'prosesTambah') {
+    $controller = new BerkasController();
+    $controller->prosesTambah();
+
+} elseif ($aksi == 'edit') {
+    $controller = new BerkasController();
+    $controller->edit();
+
+} elseif ($aksi == 'prosesEdit') {
+    $controller = new BerkasController();
+    $controller->prosesEdit();
+
+} elseif ($aksi == 'hapus') {
+    $controller = new BerkasController();
+    $controller->hapus();
+
+} elseif ($aksi == 'terima') {
+    $controller = new BerkasController();
+    $controller->terima();
 }
 
-switch ($page) {
-    case 'login':
-        $controller->login();
-        break;
-    case 'prosesLogin':
-        $controller->prosesLogin();
-        break;
-    case 'signIn':
-        $controller->signIn();
-        break;
-    case 'prosesSignIn':
-        $controller->prosesSignIn();
-        break;
-    case 'logout':
-        $controller->logout();
-        break;
-    case 'beranda':
-        $controller->beranda();
-        break;
-    case 'berkasInternal':
-        $controller->berkasInternal();
-        break;
-    case 'listBerkas':
-        $controller->listBerkas();
-        break;
-    case 'tambah':
-        $controller->tambah();
-        break;
-    case 'prosesTambah':
-        $controller->prosesTambah();
-        break;
-    case 'edit':
-        $controller->edit();
-        break;
-    case 'prosesEdit':
-        $controller->prosesEdit();
-        break;
-    case 'hapus':
-        $controller->hapus();
-        break;
-    case 'terima':
-        $controller->terima();
-        break;
-    case 'profile':
-        $controller->profile();
-        break;
-    case 'prosesProfile':
-        $controller->prosesProfile();
-        break;
-    default:
-        $controller->login();
-        break;
-}
 ?>
