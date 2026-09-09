@@ -80,7 +80,8 @@
                                         <p class="empty">Belum ada file.</p>
                                     <?php } else { ?>
                                         <ul class="file-list">
-                                            <?php foreach (explode('|||', $row['daftar_file']) as $file) { ?>
+                                            <?php foreach (preg_split('/\r?\n|\|\|\|/', $row['daftar_file']) as $file) { ?>
+                                                <?php if ($file === '') { continue; } ?>
                                                 <li>
                                                     <a href="uploads/<?php echo urlencode($file); ?>" target="_blank">
                                                         <?php echo htmlspecialchars($file); ?>

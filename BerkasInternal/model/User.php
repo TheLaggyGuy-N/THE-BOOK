@@ -48,7 +48,7 @@ class User {
         return (int) $data['total'];
     }
     public function daftarPengguna() {
-        $hasil = $this->conn->query("SELECT id_user, nama, username FROM `user` ORDER BY nama ASC");
+        $hasil = $this->conn->query("SELECT id_user, nama, bagian FROM `user` ORDER BY nama ASC");
         return $hasil->fetch_all(MYSQLI_ASSOC);
     }
     public function register($nama, $username, $password, $bagian) {

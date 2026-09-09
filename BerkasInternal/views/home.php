@@ -123,7 +123,7 @@
                             <option value="" class="text-center">--- Pilih Pengguna ---</option>
                             <?php foreach ($daftarPengguna as $pengguna) { ?>
                                 <option value="<?php echo (int) $pengguna['id_user']; ?>">
-                                    <?php echo htmlspecialchars($pengguna['nama'] . ' (' . $pengguna['username'] . ')'); ?>
+                                    <?php echo htmlspecialchars($pengguna['nama'] . ' (' . $pengguna['bagian'] . ')'); ?>
                                 </option>
                             <?php } ?>
                         </select>

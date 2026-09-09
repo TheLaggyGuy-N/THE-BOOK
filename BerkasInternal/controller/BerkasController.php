@@ -116,7 +116,14 @@ class BerkasController {
         if (!is_dir($folder)) {
             mkdir($folder, 0777, true);
         }
-        $idBerkas = 0;
+        $idBerkas = $model->tambahData(
+            $nama,
+            $tgl,
+            $pengirim,
+            $tujuan,
+            $keterangan,
+            null
+        );
         if (isset($_FILES['file_berkas']['name']) &&
             is_array($_FILES['file_berkas']['name'])) {
             foreach ($_FILES['file_berkas']['name'] as $i => $namaFile) {
@@ -131,28 +138,8 @@ class BerkasController {
                 )) {
                     continue;
                 }
-                $idBaru = $model->tambahData(
-                    $nama,
-                    $tgl,
-                    $pengirim,
-                    $tujuan,
-                    $keterangan,
-                    $file
-                );
-                if ($idBerkas === 0) {
-                    $idBerkas = $idBaru;
-                }
+                $model->tambahFile($idBerkas, $file);
             }
-        }
-        if ($idBerkas === 0) {
-            $idBerkas = $model->tambahData(
-                $nama,
-                $tgl,
-                $pengirim,
-                $tujuan,
-                $keterangan,
-                null
-            );
         }
         if ($idBerkas > 0) {
             $model->buatPesanSistem(
@@ -175,6 +162,8 @@ class BerkasController {
         $model = new Berkas();
         $data = $model->editData($id);
         $user = $model->tampilUser();
+        $pesan = $_SESSION['pesan'] ?? '';
+        unset($_SESSION['pesan']);
         require_once "views/edit.php";
     }
     public function prosesEdit() {
@@ -183,11 +172,19 @@ class BerkasController {
             header("Location: index.php?aksi=login");
             exit;
         }
-        $id = $_POST['id_berkas'];
-        $nama = $_POST['n_dokumen'];
-        $tgl = $_POST['tgl_kirim'];
+        $id = (int) ($_POST['id_berkas'] ?? 0);
+        $nama = trim($_POST['n_dokumen'] ?? '');
+        $tgl = $_POST['tgl_kirim'] ?? '';
         $tujuan = (int) ($_POST['tujuan'] ?? 0);
-        $keterangan = $_POST['keterangan'];
+        $keterangan = $_POST['keterangan'] ?? '';
+        $userModel = new User();
+        if ($id <= 0 || $nama === '' || $tujuan <= 0
+            || $tujuan === (int) $_SESSION['id_user']
+            || !$userModel->ambilUser($tujuan)) {
+            $_SESSION['pesan'] = 'Pilih satu penerima yang valid.';
+            header("Location: index.php?aksi=edit&id=" . $id);
+            exit;
+        }
         $file = "";
         if (isset($_FILES['file_berkas']) &&
             $_FILES['file_berkas']['error'] == 0) {

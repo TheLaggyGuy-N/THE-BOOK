@@ -37,7 +37,7 @@ CREATE TABLE `berkas` (
   `tgl_terima` datetime DEFAULT NULL,
   `tujuan` varchar(20) DEFAULT NULL,
   `keterangan` text,
-  `file_berkas` varchar(255) DEFAULT NULL,
+  `file_berkas` text,
   `status` enum('Dikirim','Diterima','Ditolak') NOT NULL DEFAULT 'Dikirim'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 

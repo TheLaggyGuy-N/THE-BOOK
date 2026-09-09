@@ -14,6 +14,8 @@ class Berkas {
         $this->conn->query("ALTER TABLE `berkas`
             MODIFY `status` ENUM('Dikirim', 'Diterima', 'Ditolak')
                 NOT NULL DEFAULT 'Dikirim'");
+        $this->conn->query("ALTER TABLE `berkas`
+            MODIFY `file_berkas` TEXT DEFAULT NULL");
         $this->conn->query("UPDATE `berkas` b
             LEFT JOIN `user` u ON b.id_tujuan = u.id_user
             SET b.id_tujuan = NULL
@@ -262,7 +264,11 @@ class Berkas {
         $hasilFile = $files->get_result();
         while ($file = $hasilFile->fetch_assoc()) {
             if (!empty($file['file_berkas'])) {
-                $detail['daftar_file'][] = $file['file_berkas'];
+                foreach (preg_split('/\r?\n|\|\|\|/', $file['file_berkas']) as $namaFile) {
+                    if ($namaFile !== '') {
+                        $detail['daftar_file'][] = $namaFile;
+                    }
+                }
             }
         }
 
@@ -501,6 +507,16 @@ class Berkas {
         }
         return $this->conn->insert_id;
     }
+    public function tambahFile($id_berkas, $file) {
+        if ((int) $id_berkas <= 0 || $file === '') {
+            return false;
+        }
+        $stmt = $this->conn->prepare("UPDATE berkas SET
+            file_berkas = CONCAT_WS(CHAR(10), NULLIF(file_berkas, ''), ?)
+            WHERE id_berkas = ?");
+        $stmt->bind_param("si", $file, $id_berkas);
+        return $stmt->execute();
+    }
     public function editData($id) {
         $sql = "SELECT * FROM berkas
                 WHERE id_berkas = $id";
@@ -508,6 +524,9 @@ class Berkas {
         return $hasil->fetch_assoc();
     }
     public function prosesEdit($id, $nama, $tgl, $tujuan, $keterangan, $file) {
+        if ((int) $id <= 0 || (int) $tujuan <= 0) {
+            return false;
+        }
         $sql = "UPDATE berkas SET
                 n_dokumen = ?, tgl_kirim = ?, id_tujuan = ?,
                 tujuan_semua = 0, tgl_terima = NULL, status = 'Dikirim',

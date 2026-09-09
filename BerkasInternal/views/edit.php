@@ -7,6 +7,9 @@
 <body>
 <div class="box">
     <h2>Edit Berkas</h2>
+    <?php if (!empty($pesan)) { ?>
+        <p class="form-message"><?php echo htmlspecialchars($pesan); ?></p>
+    <?php } ?>
     <form action="index.php?aksi=prosesEdit" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="id_berkas"
         value="<?php echo $data['id_berkas']; ?>">
@@ -17,11 +20,13 @@
         <input type="datetime-local" name="tgl_kirim"
         value="<?php echo date('Y-m-d\TH:i', strtotime($data['tgl_kirim'])); ?>" required>
         <label>Tujuan</label>
-        <select name="tujuan" id="tujuan">
+        <select name="tujuan" id="tujuan" required>
             <option value="" style="text-align: center;">--- Pilih Pengguna ---</option>
             <?php foreach ($user as $row) { ?>
                 <?php if ($row['id_user'] != $_SESSION['id_user']) { ?>
-                    <option value="<?php echo $row['id_user']; ?>" style="text-align: center;">
+                    <option value="<?php echo $row['id_user']; ?>"
+                        <?php echo ((int) $row['id_user'] === (int) $data['id_tujuan']) ? 'selected' : ''; ?>
+                        style="text-align: center;">
                         <?php echo $row['nama']; ?> (<?php echo $row['bagian']; ?>)
                     </option>
                 <?php } ?>
