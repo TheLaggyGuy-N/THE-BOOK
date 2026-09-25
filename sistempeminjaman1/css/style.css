@@ -1,0 +1,100 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial;
+    background:#fff;
+}
+
+.menu{
+    width:200px;
+    height:100vh;
+    position:fixed;
+    padding:20px;
+    border-right:1px solid #ccc;
+}
+
+.menu h2{
+    margin-bottom:20px;
+}
+
+.menu a{
+    display:block;
+    color:#000;
+    text-decoration:none;
+    padding:8px 0;
+}
+
+.menu a:hover{
+    text-decoration:underline;
+}
+
+.isi{
+    margin-left:200px;
+    padding:25px;
+}
+
+.box{
+    width:500px;
+    padding:20px;
+    border:1px solid #ccc;
+}
+
+input,select{
+    width:100%;
+    padding:8px;
+    margin:5px 0 15px;
+}
+
+button{
+    padding:8px 15px;
+    background:#000;
+    color:#fff;
+    border:0;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:left;
+}
+
+th{
+    background:#eee;
+}
+
+td a{
+    color:#000;
+}
+
+.login{
+    width:350px;
+    margin:100px auto;
+    padding:25px;
+    border:1px solid #ccc;
+}
+
+.login input{
+    margin-bottom:10px;
+}
+
+.login button{
+    width:100%;
+}
+
+.login a{
+    color:#000;
+}
+
+.error{
+    color:#000;
+    margin-bottom:10px;
+}
