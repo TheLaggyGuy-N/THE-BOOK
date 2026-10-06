@@ -1,0 +1,81 @@
+PHP
+A.Varabel adalah tempat untuk menyimpan nilai atau informasi 
+
+B.variabel diawali dengan  tanda $ dan diikuti underscore (_) ataupun abjad dan diakhiri (;)
+
+C.variabel tidak boleh menggunakan tanda * atau ^ dan tidak boleh diawali angka
+
+D.Variabel akan berubah jika(nilai yg pertama kali dibuat) digantikan nilai yang baru maka variabel
+  akan mencetak nilai yang baru
+    1.String = Ciri2 nya mmenggunakan kutip dua(""), angka 0-9,abjad A-Z
+    Tipe data string adalah tipe data yang berisi text, kalimat atau kumpulan karakter dalam PHP ada 4 cara membuat tipe data string
+    A. Singgle Quote
+    single quote ARTINYA ADALAH 1 PETIK ('') 
+    Contoh:
+
+    <?PHP
+    $string = 'Nama saya ahmad wahyudi';
+    $string2 = 'saya sekolah di SMK PGRI 1 depok
+                dengan jurusan pengembanngan perangkat lunak dan gim';
+    
+    $echo $string;
+    echo "<br/>";
+    $echo $string2;
+    echo "<br/>";
+?>
+    2.Interger = berisi Angka (tidak menggunakan ("")),Tipe data bilangan bulat
+    Komputer hanya bisa menjangkau data interger yaitu -2,147,495,648 sampai positif +2,147,495,648
+    Interger bisa membaca bilangan:
+    A.Bilangan Desimal (0-9) -> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 -> disebut 10 basis.
+    B.Bilangan Hexadesimal (0-9 & A-F) Total 16 basis.
+
+    3.Float = pecahan bilangan koma disebut juga dengan tipe data floating point, 
+    "TITIK" yang menandakan bilangan desimal angka float adalah contoh 0.9 atau 3,14.
+    dalam bahasa pemograman koma tidk digunakan melainkan diganti dengan titik(.)
+
+    4.Boolean = true or false
+
+    5.Array = Pengelompokan data
+
+    6.Char = 1 Karakter Misal 100-90=A, A adalah karakter dari 100-90.
+
+E.Konstanta suatu lokasi penyimpanan(dalam memory) yang nilainya tetap
+  (nilai yg pertama kali dibuat)walaupun ada nilai yang baru.
+
+F.Untuk memakai Konstanta const atau define
+
+G.Konstanta seperti variable yaitu mempunyai ciri case_sensitive
+
+H.Function tidak bisa mencetak echo, Function hanya membuat/memproses apa yang akan di cetak.
+guna parameter adalah untuk membedakan 
+  A.Variabel scope(ruang lingkup)
+    artinya kode program bisa di jalankan jika masih ada di ruang lingkup variabel($), variabel secara default tidak bisa diakses
+    oleh kode program di luar function dan sebaliknya dari luar tidak dapat mengakses variabel di dalam function.
+  B.Global
+  Jika variabel ditambah variabel "global" sebelum pendefinisian variabel
+    *<?php
+    $a = 7;
+
+    function coba(){
+        global $a;
+        global $b;
+
+       $b = 15;
+       echo "$a <br/>"; // 7
+       echo "$b <br/>" ; // 15
+
+    }
+    
+    coba();
+    echo "$a <br/>"; // 7
+    echo $b; // 15
+
+?>*
+  program ini tidak akan error seperti sebelumnya perintah ini membuat variabel bisa didefinisikan di luar
+  function dan sebaliknya.
+  C.Static 
+  variabel adalah jenis variabel yang mempertahankan nilainya pada setiap pemanggilan function. Variabel ini
+  berbeda dengan variabel lainnya yang secara otomatis akan di reset setelah dijalankan.
+
+i.Operation adalah simbol yang digunakan untuk melakukan operasi pada variabel
+g.$this pada class/objek untuk memanggil properti dengan secara paksa pada suatu class
